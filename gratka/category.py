@@ -147,7 +147,12 @@ def get_category(main_category, detail_category, voivodeship, region, **filters)
             'heating[]':  # A list of int: 1 = "CO węglowe", 2 = "CO gazowe", 3 = "CO elektryczne", 4 = "miejskie",
                 5 = "olejowe", 6 = "kominek", 7 = "etażowe", 8 = "piec", 9 = "geotermiczne", 10 = "biomasa",
                 11 = "podłogowe", 12 = "brak"
-            'home_condition[]': list
+            'home_condition[]':  # A list of int: 14 = "wysoki standard", 1 = "idealny", 2 = "bardzo dobry",
+                3 = "dobry", 5 = "po remoncie", 7 = "odnowiony", 8 = "do odnowienia", 4 = "do remontu",
+                6 = "do wykończenia", 12 = "w budowie", 9 = "stan surowy otwarty", 10 = "stan surowy zamknięty",
+                11 = "bez białego montażu", 16 = "stan deweloperski", 17 = "do uzgodnienia", 13 = "do zamieszkania",
+                15 = "z lokatorami"
+
             'acces[]':  # A list of int: 1 = "asfalt", 2 = "utwardzony", 3 = "polny"
             'media[]': # A list of int: 4 = "prąd", 1 = "gaz", 2 = "woda"
 

@@ -11,7 +11,7 @@ log = logging.getLogger(__file__)
 SCRAPE_LIMIT = os.environ.get('SCRAPE_LIMIT', None)
 
 if __name__ == '__main__':
-    input_dict = {'ga': 4}
+    input_dict = {}
 
     if os.getenv('PRICE_TO'):
         input_dict['maximal_price'] = os.getenv('PRICE_TO')
