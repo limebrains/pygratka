@@ -29,8 +29,24 @@ FILTER_MAP = {
     'state': 'std', 'access': 'doj', 'utilities': 'me', 'number_of_people': 'losb'
 }
 
+def html_decode(s):
+    """
+    Returns the ASCII decoded version of the given HTML string. This does
+    NOT remove normal HTML tags like <p>.
+    """
+    htmlCodes = (
+            ("'", '&#39;'),
+            ('"', '&quot;'),
+            ('>', '&gt;'),
+            ('<', '&lt;'),
+            ('&', '&amp;')
+        )
+    for code in htmlCodes:
+        s = s.replace(code[1], code[0])
+    return s
 
-def replace_all(list, dic):
+
+def replace_all_in_list(list, dic):
     """
     This method returns the input list, but replaces its elements according to the input dictionary.
     :param list: input list
@@ -42,6 +58,20 @@ def replace_all(list, dic):
     for i, element in enumerate(list):
         list[i] = dic[element]
     return list
+
+
+def replace_all(text, dic):
+    """
+    This method returns the input string, but replaces its characters according to the input dictionary.
+    :param text: input string
+    :param dic: dictionary containing the changes. key is the character that's supposed to be changed and value is
+                the desired value
+    :rtype: string
+    :return: String with the according characters replaced
+    """
+    for i, j in dic.items():
+        text = text.replace(i, j)
+    return text
 
 
 def normalize_text(text, lower=True, replace_spaces='_'):
@@ -96,9 +126,10 @@ def get_url(main_category, detail_category, voivodeship, region, page=1, **filte
     This method builds a ready-to-use url based on the input parameters.
     :param main_category: see :meth:`gratka.category.get_category` for reference
     :param detail_category: see :meth:`gratka.category.get_category` for reference
+    :param voivodeship: see :meth:`gratka.category.get_category` for reference
     :param region: see :meth:`gratka.category.get_category` for reference
     :param page: page number
-    :param filters: see :meth:`scrape.category.get_category` for reference
+    :param filters: see :meth:`gratka.category.get_category` for reference
     :rtype: string
     :return: the url
     """
@@ -108,8 +139,10 @@ def get_url(main_category, detail_category, voivodeship, region, page=1, **filte
         detail_category = main_category
     region_dict = get_region_from_autosuggest(region)
     basic_url = "/".join([BASE_URL, detail_category, "lista"]) + "/" + ",".join([voivodeship, region_dict.get("city", "")])
+    if "keywords" in filters:
+        filters["keywords"] = filters["keywords"].replace(" ", "_").replace(",", "%5E")
     filters_value_list = list(filters.values()) + [page]
-    filters_key_list = replace_all(list(filters.keys()), FILTER_MAP) + ['s']
+    filters_key_list = replace_all_in_list(list(filters.keys()), FILTER_MAP) + ['s']
     for i, value in enumerate(filters_value_list):
         if isinstance(value, list):
             filters_value_list[i] = "_".join([str(x) for x in value])

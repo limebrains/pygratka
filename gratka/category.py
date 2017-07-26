@@ -17,6 +17,11 @@ log = logging.getLogger(__file__)
 
 
 def was_category_search_successful(markup):
+    """
+    This method checks whether the search gave any results.
+    :param markup: a requests.response.content object
+    :rtype: boolean
+    """
     html_parser = BeautifulSoup(markup, "html.parser")
     has_warning = bool(html_parser.find(class_="brakWynikow"))
     return not has_warning
@@ -27,7 +32,7 @@ def parse_category_offer(offer_markup):
     A method for getting the most important data out of an offer markup.
     :param offer_markup: a requests.response.content object
     :rtype: dict(string, string)
-    :return: see the return section of :meth:`scrape.category.get_category` for more information
+    :return: see the return section of :meth:`gratka.category.get_category` for more information
     """
     html_parser = BeautifulSoup(offer_markup, "html.parser")
     link = html_parser.find("a")
@@ -70,8 +75,8 @@ def get_category_number_of_pages(markup):
     :rtype: int
     """
     html_parser = BeautifulSoup(markup, "html.parser")
-    pages = html_parser.find(lambda tag: tag.name == 'a' and tag.get('class') == ['strona']).text
-    return int(pages) if pages else 1
+    pages = html_parser.find(lambda tag: tag.name == 'a' and tag.get('class') == ['strona'])
+    return int(pages.text) if pages else 1
 
 
 def get_category(main_category, detail_category, voivodeship, region, **filters):
@@ -80,59 +85,75 @@ def get_category(main_category, detail_category, voivodeship, region, **filters)
     :param main_category: "mieszkania", "domy", "dzialki-grunty", "lokale-obiekty", "garaze", "pokoje-do-wynajecia" or "inwestycje"
     :param detail_category: "do-wynajecia", "sprzedam" or "inne", doesn't apply when main_category is "inwestycje" or "pokoje-do-wynajecia"
     :param voivodeship: any existing Polish vooivodeship
-    :param region: a string that contains the region name. Districts, cities and voivodeships are supported. The exact location is established using Gratka's API, just as it would happen when typing something into the search bar. Empty string returns results for the whole country.
+    :param region: a string that contains the region name. Districts, cities and voivodeships are supported.
+                    The exact location is established using Gratka's API, just as it would happen when typing something
+                    into the search bar. Empty string returns results for the whole country.
     :param filters:
-    :return: the following dict contains every possible filter with examples of its values, but can be empty:
+    :return: the following dict contains every possible filter (for apartments, houses and rooms) with descriptions of
+            its values, but can be empty:
 
     ::
         input_dict = {
-            'minimal_price':
-            'maximal_price':
-            'minimal_surface':
-            'maximal_surface':
-            'minimal_room_count':
-            'maximal_room_count':
-            'minimal_price_per_square_meter':
-            'maximal_price_per_square_meter':
-            'minimal_floor':
-            'maximal_floor':
-            'minimal_year_built':
-            'maximal_year_built':
-            'building_type': list
-            'paid_for': list
-            'rent_time':
-            'additional_surface':
-            'levels_count':
-            'noise_level':
-            'apartment_state': list
-            'date_added':
-            'added_by_agency':
-            'added_by_newspaper':
-            'added_by_private':
-            'added_by_other':
-            'keywords': list
-            'offer_number':
-            'tenders_only':
-            'with_video_only':
-            'with_map_localization_only':
-            'exclusive_only':
-            'marked_as_cooperating':
+            'price_from':  # int
+            'price_to':  # int
+            'acreage_from':  # int
+            'acreage_to':  # int
+            'room_count_from':  # int from 1 to 21, where 21 means "20 and up"
+            'room_count_to':  # int from 1 to 21, where 21 means "20 and up"
+            'price_m2_from':  # int
+            'price_m2_to':  # int
+            'floor_from':  # int from 1 to 33, where 1 is the ground floor, 32 means "above 30" and 33 is the garret
+            'floor_to':  # int from 1 to 33, where 1 is the ground floor, 32 means "above 30" and 33 is the garret
+            'floor_count_from':  # int, where everything above 30 means "above 30"
+            'floor_count_to':  # int, where everything above 30 means "above 30"
+            'construction_year_from':  # int: 1 = "okres przedwojenny", 2 = "lata 40", 3 = "lata 50", 4 = "lata 60",
+                5 = "lata 70", 6 = "lata 80", 7 = "lata 90", 8 = "lata 2000-2009", 10 = "nowe"
+            'construction_year_to':  # int: 1 = "okres przedwojenny", 2 = "lata 40", 3 = "lata 50", 4 = "lata 60",
+                5 = "lata 70", 6 = "lata 80", 7 = "lata 90", 8 = "lata 2000-2009", 10 = "nowe"
+            'type_of_building[]':  # A list of int, but different values mean different things depending on the category.
+                For apartments, it looks like this: 1 = "blok", 2 = "kamienica", 3 = "dom wielorodzinny",
+                4 = "apartamentowiec", 5 = "wieżowiec"
+                For houses: 1 = "wolnostojący", 2 = "segment środkowy", 3 = "segment skrajny", 4 = "bliźniak",
+                5 = "pół bliźniaka", 6 = "kamienica", 7 = "willa", 8 = "rezydencja", 9 = "dworek", 10 = "szeregowy",
+                11 = "piętro domu", "12 = rekreacyjny"
+            'payment_period[]':  # A list of int: 1 = "za miesiąc", 2 = "za dobę"
+            'rental_period':  # int: 1 = "pół roku", 2 = "rok", 8 = "ponad rok", 3 = "dwa lata", 4 = "3 lata",
+                5 = "dłużej niż 3 lata", 6 = "wakacyjny", 7 = "do uzgodnienia"
+            'additional_space[]':  # A list of int: 1 = "loggia", 2 = "balkon", 3 = "drzwi balkonowe", 4 = "taras",
+                5 = "komórka lokatorska", 6 = "piwnica", 7 = "strych", 8 = "ogród"
+            'level_count':  # int: 1 = "jednopoziomowe", 2 = "dwupoziomowe", 3 = "wielopoziomowe"
+            'volume':  # int: 1 = "głośne", 2 = "umiarkowanie głośne", 3 = "umiarkowanie ciche", 4 = "ciche"
+            'apartment_condition[]':  # A list of int: 9 = "wysoki standard", 5 = "idealny", 8 = "bardzo dobry", 12 = "dobry",
+                1 = "po remoncie", 3 = "odnowione", 10 = "do odświeżenia", 4 = "do odnowienia", 2 = "do remontu",
+                7 = "do wykończenia", 6 = "w budowie"
+            'period_day':  # string: "1d" = "z ostatnich 24h", "3d" = "z ostatnich 3 dni", "7d" = "z ostatnich 7 dni",
+                "14d" = "z ostatnich 14 dni", "1m" = "z ostatniego miesiąca", "3m" = "z ostatnich 3 miesięcy"
+            'posted_by[]':  # A list of int: 3 = "biura nieruchomości", 2 = "gazety", 1 = "osoby prywatne", 5 = "inne"
+            'keyword':  # string: parts of the description, divided by "," for OR
+            'offer_number':  # int, the same as in offer_id (in context)
+            'additional_params[]':  # A list of int: 2 = "tylko przetargi", 3 = "tylko z wideo",
+                4 = "z lokalizacją na mapie", 5 = "tylko na wyłączność", 6 = "z loznaczone jako "współpracuję""
 
             # for houses only:
 
-            'minimal_allotment_surface':
-            'maximal_allotment_surface':
-            'garage_type': list
-            'building_material': list
-            'building_technology': list
-            'heating_type': list
-            'state': list
-            'access': list
-            'utilities': list
+            'plot_acreage_from':  # int
+            'plot_acreage_to':  # int
+            'garage[]':  # A list of int: 1 = "w budynku", 2 = "wolnostojący", 3 = "wiata", 4 = "jednostanowiskowy",
+                5 = "dwustanowiskowy", 6 = "płatny dodatkowo", 7 = "brak"
+            'material[]':  # A list of int: 1 = "cegła", 2 = "pustak", 3 = "płyta", 4 = "gazobeton",
+                5 = "bloczki", 6 = "silikat", 7 = "drewno", 8 = "mieszany"
+            'technology[]':  # A list of int: 1 = "murowana", 2 = "styropianowa", 3 = "kanadyjska", 4 = "Ytong",
+                5 = "drewniana", 6 = "szkieletowa"
+            'heating[]':  # A list of int: 1 = "CO węglowe", 2 = "CO gazowe", 3 = "CO elektryczne", 4 = "miejskie",
+                5 = "olejowe", 6 = "kominek", 7 = "etażowe", 8 = "piec", 9 = "geotermiczne", 10 = "biomasa",
+                11 = "podłogowe", 12 = "brak"
+            'home_condition[]': list
+            'acces[]':  # A list of int: 1 = "asfalt", 2 = "utwardzony", 3 = "polny"
+            'media[]': # A list of int: 4 = "prąd", 1 = "gaz", 2 = "woda"
 
             # for rooms only:
 
-            'number_of_people':
+            'number_of_people[]':  # A list of int, 1-4 allowed, where 4 is "4 and up"
 
         }
     """
