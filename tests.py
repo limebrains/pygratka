@@ -38,7 +38,7 @@ def test_replace_all(text, dic, expected_value):
 @pytest.mark.parametrize(
     'list,dic,expected_value', [
         ([1, 2, 3], {2: 4}, [1, 4, 3]),
-        (list('Gdańsk'), {'ń': 'n'}, list('Gdansk'))
+        (list(u'Gdańsk'), {u'ń': u'n'}, list(u'Gdansk'))
      ])
 def test_replace_all_in_list(list, dic, expected_value):
     assert utils.replace_all_in_list(list, dic) == expected_value

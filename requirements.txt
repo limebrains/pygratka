@@ -1,5 +1,8 @@
+mock
 requests
-https://github.com/limebrains/scrapper-helpers/archive/master.zip
-bs4
+https://github.com/PLJohnny/scrapper-helpers/archive/master.zip
+beautifulsoup4
 pyyaml
 pytest
+requests
+pytest-cov
