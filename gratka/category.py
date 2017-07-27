@@ -79,21 +79,33 @@ def get_category_number_of_pages(markup):
     return int(pages.text) if pages else 1
 
 
-def get_category(main_category, detail_category, voivodeship, region, **filters):
+def get_category(region, **filters):
     """
-
-    :param main_category: "mieszkania", "domy", "dzialki-grunty", "lokale-obiekty", "garaze", "pokoje-do-wynajecia" or "inwestycje"
-    :param detail_category: "do-wynajecia", "sprzedam" or "inne", doesn't apply when main_category is "inwestycje" or "pokoje-do-wynajecia"
-    :param voivodeship: any existing Polish vooivodeship
     :param region: a string that contains the region name. Districts, cities and voivodeships are supported.
                     The exact location is established using Gratka's API, just as it would happen when typing something
-                    into the search bar. Empty string returns results for the whole country.
+                    into the search bar. Empty string returns results for the whole country. Will be omitted if city
+                    present in filters
     :param filters:
     :return: the following dict contains every possible filter (for apartments, houses and rooms) with descriptions of
             its values, but can be empty:
 
     ::
         input_dict = {
+            'category_root':  # int: 100382 = "Nieruchomości"
+            'category_changer':  # int:
+                For apartments:
+                100397 = "na sprzedaż", 100392 = "na sprzedaż/rynek pierwotny", 100393 = "na sprzedaż/rynek wtórny,
+                105101 = "na sprzedaż/w programie MdM", 100401 = "do wynajęcia", 105201 = "inne"
+                For houses:
+                100402 = "na sprzedaż", 100394 = "na sprzedaż/rynek pierwotny", 100395 = "na sprzedaż/rynek wtórny",
+                105102 = "na sprzedaż/w programie MdM", 100406 = "do wynajęcia", 105202 = "inne"
+                For rooms:
+                108251
+            'estate_region':  # int, an internal Gratka voivodeship ID
+            'city':  # string, name of the city
+            'county':  # string, name of the county
+            'district':  # string, name of the district
+            'street':  #string, name of the street
             'price_from':  # int
             'price_to':  # int
             'acreage_from':  # int
@@ -165,7 +177,7 @@ def get_category(main_category, detail_category, voivodeship, region, **filters)
     page, pages_count, parsed_content = 1, None, []
 
     while page == 1 or page <= pages_count:
-        url = get_url(main_category, detail_category, voivodeship, region, page, **filters)
+        url = get_url(region, page, **filters)
         log.info(url)
         content = get_response_for_url(url).content
         if not was_category_search_successful(content):

@@ -16,7 +16,7 @@ if __name__ == '__main__':
     if os.getenv('PRICE_TO'):
         input_dict['maximal_price'] = os.getenv('PRICE_TO')
 
-    parsed_category = get_category("mieszkania", "do-wynajecia", "pomorskie", "gda", **input_dict)
+    parsed_category = get_category("gda", **input_dict)
 
     log.info("Offers in that category - {0}".format(len(parsed_category)))
 

@@ -6,6 +6,7 @@ import logging
 import requests
 import unicodedata
 from scrapper_helpers.utils import caching
+from requests_toolbelt.multipart.encoder import MultipartEncoder
 try:
     from __builtin__ import unicode
 except ImportError:
@@ -44,6 +45,35 @@ def html_decode(s):
     for code in htmlCodes:
         s = s.replace(code[1], code[0])
     return s
+
+
+def get_url_from_mapper(filters):
+    """
+    Sends a request to Gratka's URL mapper which returns a valid URL given the supplied key-value pairs
+    :param filters: see :meth:`gratka.category.get_category` for reference
+    :return: A valid Gratka.pl URL as string
+    """
+    paramlist = []
+    for k, v in filters.items():
+        if isinstance(v, list):
+            for element in v:
+                paramlist.append((k, str(element)))
+        else:
+            paramlist.append((k, str(v)))
+
+    url = "http://www.gratka.pl/mapper/"
+
+    payload = "\r\n".join([
+        "------WebKitFormBoundary7MA4YWxkTrZu0gW\r\nContent-Disposition: form-data; name=\"{0}\"\r\n\r\n{1}".format(p[0], p[1])
+        for p in paramlist
+
+    ])
+    headers = {
+        'content-type': "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW",
+        'cache-control': "no-cache",
+    }
+    response = requests.request("POST", url, data=payload.encode("utf-8"), headers=headers)
+    return json.loads(response.text)["redirectUrl"]
 
 
 def replace_all_in_list(list, dic):
@@ -117,37 +147,39 @@ def get_region_from_autosuggest(region_part):
         region_dict["street"] = normalize_text(response["ulica"])
     if "dzielnica" in response:
         region_dict["district"] = normalize_text(response["dzielnica"])
+    if "id_wojewodztwo" in response:
+        region_dict["estate_region"] = response["id_wojewodztwo"]
 
     return region_dict
 
 
-def get_url(main_category, detail_category, voivodeship, region, page=1, **filters):
+def get_url(region, page=1, **filters):
     """
     This method builds a ready-to-use url based on the input parameters.
-    :param main_category: see :meth:`gratka.category.get_category` for reference
-    :param detail_category: see :meth:`gratka.category.get_category` for reference
-    :param voivodeship: see :meth:`gratka.category.get_category` for reference
     :param region: see :meth:`gratka.category.get_category` for reference
     :param page: page number
     :param filters: see :meth:`gratka.category.get_category` for reference
     :rtype: string
     :return: the url
     """
-    if main_category != "inwestycje" and main_category != "pokoje-do-wynajecia":
-        detail_category = "-".join([main_category, detail_category])
-    else:
-        detail_category = main_category
-    region_dict = get_region_from_autosuggest(region)
-    basic_url = "/".join([BASE_URL, detail_category, "lista"]) + "/" + ",".join([voivodeship, region_dict.get("city", "")])
-    if "keywords" in filters:
-        filters["keywords"] = filters["keywords"].replace(" ", "_").replace(",", "%5E")
-    filters_value_list = list(filters.values()) + [page]
-    filters_key_list = replace_all_in_list(list(filters.keys()), FILTER_MAP) + ['s']
-    for i, value in enumerate(filters_value_list):
-        if isinstance(value, list):
-            filters_value_list[i] = "_".join([str(x) for x in value])
-    filter_url = ",".join([basic_url] + [str(x) for x in filters_value_list] + [str(x) for x in filters_key_list]) + ".html"
-    return filter_url
+    if not (
+        'estate_region' in filters or
+        'city' in filters or
+        'street' in filters or
+        'district' in filters or
+        'county' in filters
+    ):
+        region_dict = get_region_from_autosuggest(region)
+        filters = dict(list(filters.items()) + list(region_dict.items()))
+    url = get_url_from_mapper(filters)
+    page_position = (url.count(",") - 1)//2 + 1
+    if page_position == 0:
+        return url
+    url = url.split(",")
+    url[1] += "," + str(page)
+    url[page_position] += "," + "s"
+    url = ",".join(url)
+    return url
 
 
 @caching
