@@ -2,7 +2,7 @@ mock
 requests
 https://github.com/PLJohnny/scrapper-helpers/archive/master.zip
 beautifulsoup4
-pyyaml
 pytest
+pyyaml
 requests
 pytest-cov

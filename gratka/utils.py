@@ -62,7 +62,6 @@ def get_url_from_mapper(filters):
         'cache-control': "no-cache",
     }
     response = requests.request("POST", url, data=payload.encode("utf-8"), headers=headers)
-    print(response)
     return json.loads(response.text)["redirectUrl"]
 
 

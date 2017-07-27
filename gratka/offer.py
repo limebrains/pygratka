@@ -37,7 +37,6 @@ def get_offer_apartment_details(html_parser):
             raw_data = raw_data.find_next_sibling("div")
         except AttributeError:
             break
-    print(details_dict)
     return details_dict
 
 
@@ -104,7 +103,6 @@ def get_offer_photos_links(html_parser):
     photos_links = []
     for link in raw_link_data:
         photos_links.append(link.attrs.get("href", ""))
-    print(photos_links)
     return photos_links
 
 
