@@ -3,6 +3,6 @@ requests
 https://github.com/PLJohnny/scrapper-helpers/archive/master.zip
 beautifulsoup4
 pytest
-pyyaml
+ruamel.yaml
 requests
 pytest-cov

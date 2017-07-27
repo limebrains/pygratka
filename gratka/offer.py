@@ -3,7 +3,7 @@
 import json
 import re
 
-import yaml
+import ruamel.yaml as yaml
 from bs4 import BeautifulSoup
 from gratka.utils import get_response_for_url, html_decode, replace_all
 
