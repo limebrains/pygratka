@@ -1,6 +1,6 @@
 Introduction
 ============
-pyotodom supplies two methods that can be used to scrape data from OtoDom. They are designed to work in tandem, but they can also be used separately.
+pygratka supplies two methods that can be used to scrape data from Gratka. They are designed to work in tandem, but they can also be used separately.
 
 .. _categories:
 
@@ -15,8 +15,8 @@ It can be used like this:
 
 ::
 
-    input_dict = {'[filter_float_price:to]': 1100}
-    parsed_category = scrape.category.get_category("wynajem", "mieszkanie", "gda", **input_dict)
+    input_dict = {'category_root': 100382, 'category_changer': 100401, 'price_to': 1100}
+    parsed_category = scrape.category.get_category("gda", **input_dict)
 
 The above code will put a list of dictionaries(string, string) containing all the apartments found in the given category (apartments for rent, in a region starting with "gda", cheaper than 1100 PLN) into the parsed_category variable
 

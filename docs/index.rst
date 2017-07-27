@@ -1,4 +1,4 @@
-Welcome to pyotodom's documentation!
+Welcome to pygratka's documentation!
 ====================================
 
 Contents:
