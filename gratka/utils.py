@@ -6,7 +6,7 @@ import logging
 import unicodedata
 
 import requests
-from scrapper_helpers.utils import caching
+from scrapper_helpers.utils import caching, key_sha1
 
 try:
     from __builtin__ import unicode
@@ -16,37 +16,25 @@ except ImportError:
 
 log = logging.getLogger(__file__)
 
-FILTER_MAP = {
-    'minimal_price': 'co', 'maximal_price': 'cd', 'minimal_surface': 'mo', 'maximal_surface': 'md',
-    'minimal_room_count': 'lpo', 'maximal_room_count': 'lpd', 'minimal_price_per_square_meter': 'cmo',
-    'maximal_price_per_square_meter': 'cmd', 'minimal_floor': 'po', 'maximal_floor': 'pd','minimal_floor_count': 'lo',
-    'maximal_floor_count': 'ld', 'minimal_year_built': 'rbo', 'maximal_year_built': 'rbd', 'building_type': 'tb',
-    'paid_for': 'pz', 'rent_time': 'ow', 'additional_surface': 'pod', 'levels_count': 'lpz', 'noise_level': 'gl',
-    'apartment_state': 'sm', 'date_added': 'od', 'added_by_agency': 'za', 'added_by_newspaper': 'zg',
-    'added_by_private': 'zi', 'added_by_other': 'zin', 'keywords': 'sk', 'offer_number': 'no', 'tenders_only': 'tp',
-    'with_video_only': 'tw', 'with_map_localization_only': 'lnm', 'exclusive_only': 'twy',
-    'marked_as_cooperating': 'twsp', 'minimal_allotment_surface': 'pdo', 'maximal_allotment_surface': 'pdd',
-    'garage_type': 'ga', 'building_material': 'ma', 'building_technology': 'te', 'heating_type': 'ogr',
-    'state': 'std', 'access': 'doj', 'utilities': 'me', 'number_of_people': 'losb'
-}
 
 def html_decode(s):
     """
     Returns the ASCII decoded version of the given HTML string. This does
     NOT remove normal HTML tags like <p>.
     """
-    htmlCodes = (
-            ("'", '&#39;'),
-            ('"', '&quot;'),
-            ('>', '&gt;'),
-            ('<', '&lt;'),
-            ('&', '&amp;')
-        )
-    for code in htmlCodes:
+    html_codes = (
+        ("'", '&#39;'),
+        ('"', '&quot;'),
+        ('>', '&gt;'),
+        ('<', '&lt;'),
+        ('&', '&amp;')
+    )
+    for code in html_codes:
         s = s.replace(code[1], code[0])
     return s
 
 
+@caching(key_func=key_sha1)
 def get_url_from_mapper(filters):
     """
     Sends a request to Gratka's URL mapper which returns a valid URL given the supplied key-value pairs
@@ -64,7 +52,8 @@ def get_url_from_mapper(filters):
     url = "http://www.gratka.pl/mapper/"
 
     payload = "\r\n".join([
-        "------WebKitFormBoundary7MA4YWxkTrZu0gW\r\nContent-Disposition: form-data; name=\"{0}\"\r\n\r\n{1}".format(p[0], p[1])
+        "------WebKitFormBoundary7MA4YWxkTrZu0gW\r\nContent-Disposition: form-data; name=\"{0}\"\r\n\r\n{1}"
+        .format(p[0], p[1])
         for p in paramlist
 
     ])
@@ -73,6 +62,7 @@ def get_url_from_mapper(filters):
         'cache-control': "no-cache",
     }
     response = requests.request("POST", url, data=payload.encode("utf-8"), headers=headers)
+    print(response)
     return json.loads(response.text)["redirectUrl"]
 
 
@@ -86,7 +76,7 @@ def replace_all_in_list(list, dic):
     :return: List with the according elements replaced
     """
     for i, element in enumerate(list):
-        list[i] = dic[element]
+        list[i] = dic.get(element, element)
     return list
 
 
@@ -127,8 +117,10 @@ def normalize_text(text, lower=True, replace_spaces='_'):
 
 def get_region_from_autosuggest(region_part):
     """
-    This method makes a request to the OtoDom api, asking for the best fitting region for the supplied region_part string.
-    :param region_part: input string, it should be a part of an existing region in Poland, either city, street, district or voivodeship
+    This method makes a request to the Gratka api, asking for the best fitting region for the supplied region_part
+    string.
+    :param region_part: input string, it should be a part of an existing region in Poland, either city, street,
+                        district or voivodeship
     :rtype: dict
     :return: A dictionary which contents depend on the API response.
     """
@@ -149,7 +141,7 @@ def get_region_from_autosuggest(region_part):
         region_dict["district"] = normalize_text(response["dzielnica"])
     if "id_wojewodztwo" in response:
         region_dict["estate_region"] = response["id_wojewodztwo"]
-
+    print(region_dict)
     return region_dict
 
 
@@ -172,17 +164,20 @@ def get_url(region, page=1, **filters):
         region_dict = get_region_from_autosuggest(region)
         filters = dict(list(filters.items()) + list(region_dict.items()))
     url = get_url_from_mapper(filters)
-    page_position = (url.count(",") - 1)//2 + 1
-    if page_position == 0:
-        return url
-    url = url.split(",")
-    url[1] += "," + str(page)
-    url[page_position] += "," + "s"
-    url = ",".join(url)
+    page_position = (url.count(",") - 1) // 2 + 1
+    if page_position > 0:
+        url = url.split(",")
+        url[1] += "," + str(page)
+        url[page_position] += "," + "s"
+        url = ",".join(url)
+    else:
+        url = url.split(".")
+        url[-2] += ",," + str(page) + "," + "s"
+        url = ".".join(url)
     return url
 
 
-@caching
+@caching(key_func=key_sha1)
 def get_response_for_url(url):
     """
     :param url: an url, most likely from the :meth:`gratka.utils.get_url` method

@@ -5,7 +5,6 @@ import logging
 import sys
 
 from bs4 import BeautifulSoup
-
 from gratka import BASE_URL, WHITELISTED_DOMAINS
 from gratka.utils import get_response_for_url, get_url
 
@@ -94,14 +93,14 @@ def get_category(region, **filters):
         input_dict = {
             'category_root':  # int: 100382 = "Nieruchomości"
             'category_changer':  # int:
-                For apartments:
-                100397 = "na sprzedaż", 100392 = "na sprzedaż/rynek pierwotny", 100393 = "na sprzedaż/rynek wtórny,
-                105101 = "na sprzedaż/w programie MdM", 100401 = "do wynajęcia", 105201 = "inne"
-                For houses:
-                100402 = "na sprzedaż", 100394 = "na sprzedaż/rynek pierwotny", 100395 = "na sprzedaż/rynek wtórny",
-                105102 = "na sprzedaż/w programie MdM", 100406 = "do wynajęcia", 105202 = "inne"
-                For rooms:
-                108251
+            For apartments:
+            100397 = "na sprzedaż", 100392 = "na sprzedaż/rynek pierwotny", 100393 = "na sprzedaż/rynek wtórny,
+            105101 = "na sprzedaż/w programie MdM", 100401 = "do wynajęcia", 105201 = "inne"
+            For houses:
+            100402 = "na sprzedaż", 100394 = "na sprzedaż/rynek pierwotny", 100395 = "na sprzedaż/rynek wtórny",
+            105102 = "na sprzedaż/w programie MdM", 100406 = "do wynajęcia", 105202 = "inne"
+            For rooms:
+            108251
             'estate_region':  # int, an internal Gratka voivodeship ID
             'city':  # string, name of the city
             'county':  # string, name of the county
@@ -120,51 +119,51 @@ def get_category(region, **filters):
             'floor_count_from':  # int, where everything above 30 means "above 30"
             'floor_count_to':  # int, where everything above 30 means "above 30"
             'construction_year_from':  # int: 1 = "okres przedwojenny", 2 = "lata 40", 3 = "lata 50", 4 = "lata 60",
-                5 = "lata 70", 6 = "lata 80", 7 = "lata 90", 8 = "lata 2000-2009", 10 = "nowe"
+            5 = "lata 70", 6 = "lata 80", 7 = "lata 90", 8 = "lata 2000-2009", 10 = "nowe"
             'construction_year_to':  # int: 1 = "okres przedwojenny", 2 = "lata 40", 3 = "lata 50", 4 = "lata 60",
-                5 = "lata 70", 6 = "lata 80", 7 = "lata 90", 8 = "lata 2000-2009", 10 = "nowe"
-            'type_of_building[]':  # A list of int, but different values mean different things depending on the category.
-                For apartments, it looks like this: 1 = "blok", 2 = "kamienica", 3 = "dom wielorodzinny",
-                4 = "apartamentowiec", 5 = "wieżowiec"
-                For houses: 1 = "wolnostojący", 2 = "segment środkowy", 3 = "segment skrajny", 4 = "bliźniak",
-                5 = "pół bliźniaka", 6 = "kamienica", 7 = "willa", 8 = "rezydencja", 9 = "dworek", 10 = "szeregowy",
-                11 = "piętro domu", "12 = rekreacyjny"
+            5 = "lata 70", 6 = "lata 80", 7 = "lata 90", 8 = "lata 2000-2009", 10 = "nowe"
+            'type_of_building[]':  # A list of int, but different values mean different things depending on the category
+            For apartments, it looks like this: 1 = "blok", 2 = "kamienica", 3 = "dom wielorodzinny",
+            4 = "apartamentowiec", 5 = "wieżowiec"
+            For houses: 1 = "wolnostojący", 2 = "segment środkowy", 3 = "segment skrajny", 4 = "bliźniak",
+            5 = "pół bliźniaka", 6 = "kamienica", 7 = "willa", 8 = "rezydencja", 9 = "dworek", 10 = "szeregowy",
+            11 = "piętro domu", "12 = rekreacyjny"
             'payment_period[]':  # A list of int: 1 = "za miesiąc", 2 = "za dobę"
             'rental_period':  # int: 1 = "pół roku", 2 = "rok", 8 = "ponad rok", 3 = "dwa lata", 4 = "3 lata",
-                5 = "dłużej niż 3 lata", 6 = "wakacyjny", 7 = "do uzgodnienia"
+            5 = "dłużej niż 3 lata", 6 = "wakacyjny", 7 = "do uzgodnienia"
             'additional_space[]':  # A list of int: 1 = "loggia", 2 = "balkon", 3 = "drzwi balkonowe", 4 = "taras",
-                5 = "komórka lokatorska", 6 = "piwnica", 7 = "strych", 8 = "ogród"
+            5 = "komórka lokatorska", 6 = "piwnica", 7 = "strych", 8 = "ogród"
             'level_count':  # int: 1 = "jednopoziomowe", 2 = "dwupoziomowe", 3 = "wielopoziomowe"
             'volume':  # int: 1 = "głośne", 2 = "umiarkowanie głośne", 3 = "umiarkowanie ciche", 4 = "ciche"
-            'apartment_condition[]':  # A list of int: 9 = "wysoki standard", 5 = "idealny", 8 = "bardzo dobry", 12 = "dobry",
-                1 = "po remoncie", 3 = "odnowione", 10 = "do odświeżenia", 4 = "do odnowienia", 2 = "do remontu",
-                7 = "do wykończenia", 6 = "w budowie"
+            'apartment_condition[]':  # A list of int: 9 = "wysoki standard", 5 = "idealny", 8 = "bardzo dobry",
+            12 = "dobry", 1 = "po remoncie", 3 = "odnowione", 10 = "do odświeżenia", 4 = "do odnowienia",
+            2 = "do remontu", 7 = "do wykończenia", 6 = "w budowie"
             'period_day':  # string: "1d" = "z ostatnich 24h", "3d" = "z ostatnich 3 dni", "7d" = "z ostatnich 7 dni",
-                "14d" = "z ostatnich 14 dni", "1m" = "z ostatniego miesiąca", "3m" = "z ostatnich 3 miesięcy"
+            "14d" = "z ostatnich 14 dni", "1m" = "z ostatniego miesiąca", "3m" = "z ostatnich 3 miesięcy"
             'posted_by[]':  # A list of int: 3 = "biura nieruchomości", 2 = "gazety", 1 = "osoby prywatne", 5 = "inne"
             'keyword':  # string: parts of the description, divided by "," for OR
             'offer_number':  # int, the same as in offer_id (in context)
             'additional_params[]':  # A list of int: 2 = "tylko przetargi", 3 = "tylko z wideo",
-                4 = "z lokalizacją na mapie", 5 = "tylko na wyłączność", 6 = "z loznaczone jako "współpracuję""
+            4 = "z lokalizacją na mapie", 5 = "tylko na wyłączność", 6 = "z loznaczone jako "współpracuję""
 
             # for houses only:
 
             'plot_acreage_from':  # int
             'plot_acreage_to':  # int
             'garage[]':  # A list of int: 1 = "w budynku", 2 = "wolnostojący", 3 = "wiata", 4 = "jednostanowiskowy",
-                5 = "dwustanowiskowy", 6 = "płatny dodatkowo", 7 = "brak"
+            5 = "dwustanowiskowy", 6 = "płatny dodatkowo", 7 = "brak"
             'material[]':  # A list of int: 1 = "cegła", 2 = "pustak", 3 = "płyta", 4 = "gazobeton",
-                5 = "bloczki", 6 = "silikat", 7 = "drewno", 8 = "mieszany"
+            5 = "bloczki", 6 = "silikat", 7 = "drewno", 8 = "mieszany"
             'technology[]':  # A list of int: 1 = "murowana", 2 = "styropianowa", 3 = "kanadyjska", 4 = "Ytong",
-                5 = "drewniana", 6 = "szkieletowa"
+            5 = "drewniana", 6 = "szkieletowa"
             'heating[]':  # A list of int: 1 = "CO węglowe", 2 = "CO gazowe", 3 = "CO elektryczne", 4 = "miejskie",
-                5 = "olejowe", 6 = "kominek", 7 = "etażowe", 8 = "piec", 9 = "geotermiczne", 10 = "biomasa",
-                11 = "podłogowe", 12 = "brak"
+            5 = "olejowe", 6 = "kominek", 7 = "etażowe", 8 = "piec", 9 = "geotermiczne", 10 = "biomasa",
+            11 = "podłogowe", 12 = "brak"
             'home_condition[]':  # A list of int: 14 = "wysoki standard", 1 = "idealny", 2 = "bardzo dobry",
-                3 = "dobry", 5 = "po remoncie", 7 = "odnowiony", 8 = "do odnowienia", 4 = "do remontu",
-                6 = "do wykończenia", 12 = "w budowie", 9 = "stan surowy otwarty", 10 = "stan surowy zamknięty",
-                11 = "bez białego montażu", 16 = "stan deweloperski", 17 = "do uzgodnienia", 13 = "do zamieszkania",
-                15 = "z lokatorami"
+            3 = "dobry", 5 = "po remoncie", 7 = "odnowiony", 8 = "do odnowienia", 4 = "do remontu",
+            6 = "do wykończenia", 12 = "w budowie", 9 = "stan surowy otwarty", 10 = "stan surowy zamknięty",
+            11 = "bez białego montażu", 16 = "stan deweloperski", 17 = "do uzgodnienia", 13 = "do zamieszkania",
+            15 = "z lokatorami"
 
             'acces[]':  # A list of int: 1 = "asfalt", 2 = "utwardzony", 3 = "polny"
             'media[]': # A list of int: 4 = "prąd", 1 = "gaz", 2 = "woda"
@@ -182,11 +181,11 @@ def get_category(region, **filters):
         log.info(url)
         content = get_response_for_url(url).content
         if not was_category_search_successful(content):
-             log.warning("Search for category wasn't successful", url)
-             return []
+            log.warning("Search for category wasn't successful", url)
+            return []
 
         parsed_content.extend(parse_category_content(content))
-        
+
         if page == 1:
             pages_count = get_category_number_of_pages(content)
             if page == pages_count:

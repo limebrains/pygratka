@@ -5,7 +5,6 @@ import re
 
 import yaml
 from bs4 import BeautifulSoup
-
 from gratka.utils import get_response_for_url, html_decode, replace_all
 
 
@@ -38,6 +37,7 @@ def get_offer_apartment_details(html_parser):
             raw_data = raw_data.find_next_sibling("div")
         except AttributeError:
             break
+    print(details_dict)
     return details_dict
 
 
@@ -99,10 +99,12 @@ def get_offer_photos_links(html_parser):
     :rtype: list(string)
     :return: A list of links to photos of the apartment
     """
-    raw_link_data = html_parser.find(class_="slides links").find_all("a")
+    raw_link_data = html_parser.find(class_="slides links")
+    raw_link_data = raw_link_data.find_all("a") if raw_link_data else []
     photos_links = []
     for link in raw_link_data:
         photos_links.append(link.attrs.get("href", ""))
+    print(photos_links)
     return photos_links
 
 
