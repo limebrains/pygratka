@@ -1,8 +1,9 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-import os
 import logging
+import os
+
 from gratka.category import get_category
 from gratka.offer import get_offer_information
 

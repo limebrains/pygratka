@@ -3,16 +3,16 @@
 
 import json
 import logging
-import requests
 import unicodedata
+
+import requests
 from scrapper_helpers.utils import caching
-from requests_toolbelt.multipart.encoder import MultipartEncoder
+
 try:
     from __builtin__ import unicode
 except ImportError:
     unicode = lambda x, *args: x
 
-from gratka import BASE_URL
 
 log = logging.getLogger(__file__)
 

@@ -3,6 +3,7 @@
 import json
 import logging
 import sys
+
 from bs4 import BeautifulSoup
 
 from gratka import BASE_URL, WHITELISTED_DOMAINS

@@ -2,10 +2,11 @@
 # -*- coding: utf-8 -*-
 import json
 import re
+
 import yaml
 from bs4 import BeautifulSoup
 
-from gratka.utils import get_response_for_url, replace_all, html_decode
+from gratka.utils import get_response_for_url, html_decode, replace_all
 
 
 def get_offer_apartment_details(html_parser):
@@ -142,7 +143,7 @@ def get_offer_information(url, context=None):
     html_parser = BeautifulSoup(content, "html.parser")
     detail_json_list = get_offer_detail_jsons(content)
     offer_apartment_details = get_offer_apartment_details(html_parser)
-    return{
+    return {
         'title': detail_json_list[0].get("name", ""),
         'surface': detail_json_list[1].get("floorSize", ""),
         'rooms': detail_json_list[1].get("numberOfRooms", ""),
