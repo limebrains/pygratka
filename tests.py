@@ -27,14 +27,6 @@ ACTUAL_REGIONS = [
     {'city': 'sopot', 'estate_region': 11, 'street': 'ksiazat_pomorskich'}, {}
 ]
 
-@pytest.mark.parametrize(
-    'list,dic,expected_value', [
-        ([1, 2, 3], {2: 4}, [1, 4, 3]),
-        (list(u'Gdańsk'), {u'ń': u'n'}, list(u'Gdansk'))
-     ])
-def test_replace_all_in_list(list, dic, expected_value):
-    assert utils.replace_all_in_list(list, dic) == expected_value
-
 
 def test_get_region_from_autosuggest():
     with mock.patch("gratka.utils.json.loads") as json_loads:

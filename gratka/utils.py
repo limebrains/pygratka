@@ -3,7 +3,6 @@
 
 import json
 import logging
-
 import requests
 from scrapper_helpers.utils import caching, key_sha1, normalize_text
 
