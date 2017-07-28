@@ -8,6 +8,7 @@ from bs4 import BeautifulSoup
 from gratka.utils import get_response_for_url
 from scrapper_helpers.utils import html_decode, replace_all
 
+
 def get_offer_apartment_details(html_parser):
     """
     This method returns detailed information about the apartment.
