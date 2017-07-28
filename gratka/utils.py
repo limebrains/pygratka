@@ -3,10 +3,8 @@
 
 import json
 import logging
-import unicodedata
-
 import requests
-from scrapper_helpers.utils import caching, key_sha1
+from scrapper_helpers.utils import caching, key_sha1, normalize_text
 
 try:
     from __builtin__ import unicode
@@ -15,23 +13,6 @@ except ImportError:
 
 
 log = logging.getLogger(__file__)
-
-
-def html_decode(s):
-    """
-    Returns the ASCII decoded version of the given HTML string. This does
-    NOT remove normal HTML tags like <p>.
-    """
-    html_codes = (
-        ("'", '&#39;'),
-        ('"', '&quot;'),
-        ('>', '&gt;'),
-        ('<', '&lt;'),
-        ('&', '&amp;')
-    )
-    for code in html_codes:
-        s = s.replace(code[1], code[0])
-    return s
 
 
 @caching(key_func=key_sha1)
@@ -77,41 +58,6 @@ def replace_all_in_list(list, dic):
     for i, element in enumerate(list):
         list[i] = dic.get(element, element)
     return list
-
-
-def replace_all(text, dic):
-    """
-    This method returns the input string, but replaces its characters according to the input dictionary.
-    :param text: input string
-    :param dic: dictionary containing the changes. key is the character that's supposed to be changed and value is
-                the desired value
-    :rtype: string
-    :return: String with the according characters replaced
-    """
-    for i, j in dic.items():
-        text = text.replace(i, j)
-    return text
-
-
-def normalize_text(text, lower=True, replace_spaces='_'):
-    """
-    This method returns the input string, but normalizes is it for use in the url.
-    :param text: input string
-    :rtype: string
-    :return: Normalized string. lowercase, no diacritics, '-' instead of ' '
-    """
-    try:
-        unicoded = unicode(text, 'utf8')
-    except TypeError:
-        unicoded = text
-    if lower:
-        unicoded = unicoded.lower()
-    normalized = unicodedata.normalize('NFKD', unicoded)
-    encoded_ascii = normalized.encode('ascii', 'ignore')
-    decoded_utf8 = encoded_ascii.decode("utf-8")
-    if replace_spaces:
-        decoded_utf8 = decoded_utf8.replace(" ", replace_spaces)
-    return decoded_utf8
 
 
 def get_region_from_autosuggest(region_part):
