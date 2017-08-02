@@ -86,7 +86,6 @@ def get_region_from_autosuggest(region_part):
         region_dict["district"] = normalize_text(response["dzielnica"])
     if "id_wojewodztwo" in response:
         region_dict["estate_region"] = response["id_wojewodztwo"]
-    print(region_dict)
     return region_dict
 
 
@@ -112,13 +111,14 @@ def get_url(region, page=1, **filters):
     page_position = (url.count(",") - 1) // 2 + 1
     if page_position > 0:
         url = url.split(",")
-        url[1] += "," + str(page)
+        url[1] = url[1] + "," + str(page) if '.html' not in url[1] else url[1][:-5] + "," + str(page)
         url[page_position] += "," + "s"
-        url = ",".join(url)
+        url = ",".join(url) + '.html'
     else:
         url = url.split(".")
         url[-2] += ",," + str(page) + "," + "s"
         url = ".".join(url)
+    log.info(url)
     return url
 
 

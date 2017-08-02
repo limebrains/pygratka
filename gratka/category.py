@@ -79,6 +79,29 @@ def get_category_number_of_pages(markup):
     return int(pages.text) if pages else 1
 
 
+def get_category_number_of_pages_from_parameters(region, **filters):
+    """A method to establish the number of pages before actually scraping any data"""
+    url = url = get_url(region, 1, **filters)
+    content = get_response_for_url(url).content
+    if not was_category_search_successful(content):
+        log.warning("Search for category wasn't successful", url)
+        return 0
+    return get_category_number_of_pages(content)
+
+
+def get_distinct_category_page(page, region, **filters):
+    """A method for scraping just the distinct page of a category"""
+    parsed_content = []
+    url = get_url(region, page, **filters)
+    content = get_response_for_url(url).content
+    if not was_category_search_successful(content):
+        log.warning("Search for category wasn't successful", url)
+        return []
+    parsed_content.extend(parse_category_content(content))
+
+    return parsed_content
+
+
 def get_category(region, **filters):
     """
     :param region: a string that contains the region name. Districts, cities and voivodeships are supported.
@@ -178,7 +201,6 @@ def get_category(region, **filters):
 
     while page == 1 or page <= pages_count:
         url = get_url(region, page, **filters)
-        log.info(url)
         content = get_response_for_url(url).content
         if not was_category_search_successful(content):
             log.warning("Search for category wasn't successful", url)
