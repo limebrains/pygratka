@@ -124,6 +124,8 @@ def get_category(region, **filters):
             105102 = "na sprzedaż/w programie MdM", 100406 = "do wynajęcia", 105202 = "inne"
             For rooms:
             108251
+            For business premises:
+            100417 = "na sprzedaż", 100421 = "do wynajęcia", 105204 =  "inne"
             'estate_region':  # int, an internal Gratka voivodeship ID
             'city':  # string, name of the city
             'county':  # string, name of the county

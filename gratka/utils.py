@@ -99,25 +99,29 @@ def get_url(region, page=1, **filters):
     :return: the url
     """
     if not (
-        'estate_region' in filters or
-        'city' in filters or
-        'street' in filters or
-        'district' in filters or
-        'county' in filters
+            ('estate_region' in filters or
+                'city' in filters or
+                'street' in filters or
+                'district' in filters or
+                'county' in filters
+             ) and region
     ):
         region_dict = get_region_from_autosuggest(region)
         filters = dict(list(filters.items()) + list(region_dict.items()))
     url = get_url_from_mapper(filters)
-    page_position = (url.count(",") - 1) // 2 + 1
-    if page_position > 0:
-        url = url.split(",")
-        url[1] = url[1] + "," + str(page) if '.html' not in url[1] else url[1][:-5] + "," + str(page)
-        url[page_position] += "," + "s"
-        url = ",".join(url) + '.html'
+    if "," in url:
+        page_position = (url.count(",") - 1) // 2 + 1
+        if page_position > 0:
+            url = url.split(",")
+            url[1] = url[1] + "," + str(page) if '.html' not in url[1] else url[1][:-5] + "," + str(page)
+            url[page_position] += "," + "s"
+            url = ",".join(url) + '.html'
+        else:
+            url = url.split(".")
+            url[-2] += ",," + str(page) + "," + "s"
+            url = ".".join(url)
     else:
-        url = url.split(".")
-        url[-2] += ",," + str(page) + "," + "s"
-        url = ".".join(url)
+        url += ",," + str(page) + "," + "s" + ".html"
     log.info(url)
     return url
 
