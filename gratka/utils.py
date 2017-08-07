@@ -46,19 +46,19 @@ def get_url_from_mapper(filters):
     return json.loads(response.text)["redirectUrl"]
 
 
-def _float(number):
-    return get_number_from_string(number, float)
+def _float(number, default=None):
+    return get_number_from_string(number, float, default)
 
 
-def _int(number):
-    return get_number_from_string(number, int)
+def _int(number, default=None):
+    return get_number_from_string(number, int, default)
 
 
-def get_number_from_string(s, number_type):
+def get_number_from_string(s, number_type, default):
     try:
         return number_type(s.replace(",", "."))
     except ValueError:
-        return s if s else None
+        return default
 
 
 def replace_all_in_list(list, dic):

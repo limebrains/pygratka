@@ -172,7 +172,7 @@ def get_offer_information(url, context=None):
     offer_apartment_details = get_offer_apartment_details(html_parser)
     return {
         'title': detail_json_list[0].get("name", ""),
-        'surface': _float(detail_json_list[1].get("floorSize", "")),
+        'surface': _float(detail_json_list[1].get("floorSize", "")) or detail_json_list[1].get("floorSize", ""),
         'rooms': detail_json_list[1].get("numberOfRooms", ""),
         'floor': _int(offer_apartment_details.get("Piętro", "")),
         'total_floors': _int(offer_apartment_details.get("Liczba pięter", "")),
