@@ -46,6 +46,21 @@ def get_url_from_mapper(filters):
     return json.loads(response.text)["redirectUrl"]
 
 
+def _float(number, default=None):
+    return get_number_from_string(number, float, default)
+
+
+def _int(number, default=None):
+    return get_number_from_string(number, int, default)
+
+
+def get_number_from_string(s, number_type, default):
+    try:
+        return number_type(s.replace(",", "."))
+    except ValueError:
+        return default
+
+
 def replace_all_in_list(list, dic):
     """
     This method returns the input list, but replaces its elements according to the input dictionary.
