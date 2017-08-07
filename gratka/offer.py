@@ -132,6 +132,19 @@ def get_offer_details(html_parser):
     return details
 
 
+def get_offer_address(html_parser):
+    """
+    This method returns detailed information about the offer's address.
+    :param html_parser: a BeautifulSoup object
+    :rtype: string
+    :return: A string containing the offer's address
+    """
+    used = set()
+    address = html_parser.title.text.split(" | ")[-1].split(" ")
+    unique_address = " ".join([x for x in address if x.strip(",") not in used and (used.add(x) or True)])
+    return unique_address
+
+
 def get_offer_information(url, context=None):
     """
     Scrape detailed information about an Gratka offer.
@@ -158,6 +171,7 @@ def get_offer_information(url, context=None):
         'city': detail_json_list[2].get("miejscowosc", ""),
         'district': detail_json_list[2].get("dzielnica", ""),
         'voivodeship': detail_json_list[1]["address"].get("addressRegion", ""),
+        'address': get_offer_address(html_parser),
         'geographical_coordinates': (
             detail_json_list[1]["geo"].get("latitude", ""),
             detail_json_list[1]["geo"].get("longitude", "")

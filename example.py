@@ -27,5 +27,9 @@ if __name__ == '__main__':
 
     for offer in parsed_category:
         log.info("Scraping offer - {0}".format(offer['detail_url']))
-        offer_detail = get_offer_information(offer['detail_url'], context=offer)
-        log.info("Scraped offer - {0}".format(offer_detail))
+        try:
+            offer_detail = get_offer_information(offer['detail_url'], context=offer)
+        except IndexError:
+            log.info("Offer not available- {0}".format(offer_detail))
+        else:
+            log.info("Scraped offer - {0}".format(offer_detail))
