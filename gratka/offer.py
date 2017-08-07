@@ -6,7 +6,7 @@ import warnings
 
 import ruamel.yaml as yaml
 from bs4 import BeautifulSoup
-from gratka.utils import get_response_for_url
+from gratka.utils import get_response_for_url, get_number_from_string
 from scrapper_helpers.utils import html_decode, replace_all
 
 
@@ -171,16 +171,16 @@ def get_offer_information(url, context=None):
     offer_apartment_details = get_offer_apartment_details(html_parser)
     return {
         'title': detail_json_list[0].get("name", ""),
-        'surface': detail_json_list[1].get("floorSize", ""),
+        'surface': get_number_from_string(detail_json_list[1].get("floorSize", ""), float),
         'rooms': detail_json_list[1].get("numberOfRooms", ""),
-        'floor': offer_apartment_details.get("Piętro", ""),
-        'total_floors': offer_apartment_details.get("Liczba pięter", ""),
+        'floor': get_number_from_string(offer_apartment_details.get("Piętro", ""), int),
+        'total_floors': get_number_from_string(offer_apartment_details.get("Liczba pięter", ""), int),
         'poster_name': get_offer_poster_name(html_parser),
         'poster_type': detail_json_list[2].get("typ_autora", ""),
         'company_name': get_offer_company_name(html_parser),
-        'price': detail_json_list[0]["offers"].get("price", ""),
+        'price': get_number_from_string(detail_json_list[0]["offers"].get("price", ""), float),
         'currency': detail_json_list[0]["offers"].get("priceCurrency", ""),
-        'additional_rent': get_offer_additional_rent(html_parser),
+        'additional_rent': get_number_from_string(get_offer_additional_rent(html_parser), float),
         'city': detail_json_list[2].get("miejscowosc", ""),
         'district': detail_json_list[2].get("dzielnica", ""),
         'voivodeship': detail_json_list[1]["address"].get("addressRegion", ""),
