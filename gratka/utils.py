@@ -46,8 +46,8 @@ def get_url_from_mapper(filters):
     return json.loads(response.text)["redirectUrl"]
 
 
-def get_number_from_string(input, number_type):
-    return number_type(input.replace(",", ".")) if input and input.isdigit() else None
+def get_number_from_string(s, number_type):
+    return number_type(s.replace(",", ".")) if s and s.replace(".", "").replace(",", "").isdigit() else None
 
 
 def replace_all_in_list(list, dic):
