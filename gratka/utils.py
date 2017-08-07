@@ -46,8 +46,19 @@ def get_url_from_mapper(filters):
     return json.loads(response.text)["redirectUrl"]
 
 
+def _float(number):
+    return get_number_from_string(number, float)
+
+
+def _int(number):
+    return get_number_from_string(number, int)
+
+
 def get_number_from_string(s, number_type):
-    return number_type(s.replace(",", ".")) if s and s.replace(".", "").replace(",", "").isdigit() else None
+    try:
+        return number_type(s.replace(",", "."))
+    except ValueError:
+        return s if s else None
 
 
 def replace_all_in_list(list, dic):
