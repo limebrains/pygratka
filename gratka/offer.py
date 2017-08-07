@@ -151,7 +151,8 @@ def get_offer_address(html_parser):
 
 def get_offer_additional_rent(html_parser):
     try:
-        additional_rent_data = html_parser.find(class_='cenaOpis').find(lambda x: x.name == 'li' and 'opłaty' in x.text).b.text
+        additional_rent_data = html_parser.find(class_='cenaOpis').find(
+            lambda x: x.name == 'li' and 'opłaty' in x.text).b.text
     except AttributeError:
         additional_rent_data = ""
     return additional_rent_data
