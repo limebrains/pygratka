@@ -12,7 +12,7 @@ log = logging.getLogger(__file__)
 SCRAPE_LIMIT = os.environ.get('SCRAPE_LIMIT', None)
 
 if __name__ == '__main__':
-    input_dict = {'category_changer': 100401, 'category_root': 100382,}
+    input_dict = {'category_changer': 100401, 'category_root': 100382}
 
     if os.getenv('PRICE_TO'):
         input_dict['price_to'] = os.getenv('PRICE_TO')

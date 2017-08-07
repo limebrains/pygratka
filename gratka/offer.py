@@ -2,11 +2,15 @@
 # -*- coding: utf-8 -*-
 import json
 import re
+import warnings
 
 import ruamel.yaml as yaml
 from bs4 import BeautifulSoup
 from gratka.utils import get_response_for_url
 from scrapper_helpers.utils import html_decode, replace_all
+
+
+warnings.simplefilter('ignore', yaml.error.UnsafeLoaderWarning)
 
 
 def get_offer_apartment_details(html_parser):
@@ -145,6 +149,14 @@ def get_offer_address(html_parser):
     return unique_address
 
 
+def get_offer_additional_rent(html_parser):
+    try:
+        additional_rent_data = html_parser.find(class_='cenaOpis').find(lambda x: x.name == 'li' and 'opłaty' in x.text).b.text
+    except AttributeError:
+        additional_rent_data = ""
+    return additional_rent_data
+
+
 def get_offer_information(url, context=None):
     """
     Scrape detailed information about an Gratka offer.
@@ -168,6 +180,7 @@ def get_offer_information(url, context=None):
         'company_name': get_offer_company_name(html_parser),
         'price': detail_json_list[0]["offers"].get("price", ""),
         'currency': detail_json_list[0]["offers"].get("priceCurrency", ""),
+        'additional_rent': get_offer_additional_rent(html_parser),
         'city': detail_json_list[2].get("miejscowosc", ""),
         'district': detail_json_list[2].get("dzielnica", ""),
         'voivodeship': detail_json_list[1]["address"].get("addressRegion", ""),
