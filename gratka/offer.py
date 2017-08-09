@@ -162,8 +162,8 @@ def get_offer_additional_assets(apartment_details):
         'disabled_facilities': 'podjazd dla niepełnosprawnych' in additional_assets,
         'mezzanine': 'antresola' in additional_assets,
         'basement': 'piwnica' in apartment_details.get('Powierzchnia dodatkowa', ''),
-        'duplex_apartment': 'dwupoziomowe' in apartment_details.get('Liczba poziomów', '')
-                            or 'wielopoziomowe' in apartment_details.get(
+        'duplex_apartment': 'dwupoziomowe' in apartment_details.get('Liczba poziomów', '') or
+                            'wielopoziomowe' in apartment_details.get(
             'Liczba poziomów', ''),
         'garden': 'ogród' in apartment_details.get('Powierzchnia dodatkowa', ''),
         'garage': 'garaż' in apartment_details.get('Garaż/Miejsce parkingowe', ''),
