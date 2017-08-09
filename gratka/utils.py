@@ -4,7 +4,7 @@
 import json
 import logging
 import requests
-from scrapper_helpers.utils import caching, key_sha1, normalize_text
+from scrapper_helpers.utils import caching, key_sha1, normalize_text, get_random_user_agent
 
 try:
     from __builtin__ import unicode
@@ -41,6 +41,7 @@ def get_url_from_mapper(filters):
     headers = {
         'content-type': "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW",
         'cache-control': "no-cache",
+        'User-Agent': get_random_user_agent()
     }
     response = requests.request("POST", url, data=payload.encode("utf-8"), headers=headers)
     return json.loads(response.text)["redirectUrl"]
@@ -147,4 +148,4 @@ def get_response_for_url(url):
     :param url: an url, most likely from the :meth:`gratka.utils.get_url` method
     :return: a requests.response object
     """
-    return requests.get(url)
+    return requests.get(url, headers={'User-Agent': get_random_user_agent()})
