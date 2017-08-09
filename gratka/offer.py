@@ -6,8 +6,8 @@ import warnings
 
 import ruamel.yaml as yaml
 from bs4 import BeautifulSoup
-from gratka.utils import get_response_for_url, _float, _int
-from scrapper_helpers.utils import html_decode, replace_all
+from gratka.utils import get_response_for_url
+from scrapper_helpers.utils import html_decode, replace_all, _float, _int
 
 
 warnings.simplefilter('ignore', yaml.error.UnsafeLoaderWarning)
@@ -149,6 +149,28 @@ def get_offer_address(html_parser):
     return unique_address
 
 
+def get_offer_additional_assets(apartment_details):
+    additional_assets = apartment_details.get('Dodatkowe zalety', '').split(', ')
+    return {
+        'heating': ', '.join([asset for asset in additional_assets if 'ogrzewanie' in asset]),
+        'balcony': 'balkon' in apartment_details.get('Powierzchnia dodatkowa', ''),
+        'kitchen': apartment_details.get('Kuchnia', ''),
+        'terrace': 'taras' in apartment_details.get('Powierzchnia dodatkowa', ''),
+        'internet': 'internet' in apartment_details.get('Dodatkowe zalety', ''),
+        'elevator': 'winda' in apartment_details.get('Dodatkowe zalety', ''),
+        'car_parking': 'parking' in apartment_details.get('Garaż/Miejsce parkingowe', ''),
+        'disabled_facilities': 'podjazd dla niepełnosprawnych' in additional_assets,
+        'mezzanine': 'antresola' in additional_assets,
+        'basement': 'piwnica' in apartment_details.get('Powierzchnia dodatkowa', ''),
+        'duplex_apartment': 'dwupoziomowe' in apartment_details.get('Liczba poziomów', '')
+                            or 'wielopoziomowe' in apartment_details.get(
+            'Liczba poziomów', ''),
+        'garden': 'ogród' in apartment_details.get('Powierzchnia dodatkowa', ''),
+        'garage': 'garaż' in apartment_details.get('Garaż/Miejsce parkingowe', ''),
+        'cable_tv': 'TV kablowa' in additional_assets
+    }
+
+
 def get_offer_additional_rent(html_parser):
     try:
         additional_rent_data = html_parser.find(class_='cenaOpis').find(
@@ -182,6 +204,7 @@ def get_offer_information(url, context=None):
         'price': _float(detail_json_list[0]["offers"].get("price", "")),
         'currency': detail_json_list[0]["offers"].get("priceCurrency", ""),
         'additional_rent': _float(get_offer_additional_rent(html_parser)),
+        'additional_assets': get_offer_additional_assets(offer_apartment_details),
         'city': detail_json_list[2].get("miejscowosc", ""),
         'district': detail_json_list[2].get("dzielnica", ""),
         'voivodeship': detail_json_list[1]["address"].get("addressRegion", ""),
