@@ -154,7 +154,6 @@ def parse_date_to_timestamp(date):
     :rtype: int
     """
     initial = convert_string_to_date(date)
-    print(initial)
     date_parts = initial.split('-')
     month = int(date_parts[1])
     year = int(date_parts[0])
