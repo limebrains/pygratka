@@ -159,8 +159,8 @@ def test_get_offer_detail_jsons(markup_path, expected_value):
 
 @pytest.mark.skipif(sys.version_info < (3, 1), reason="requires Python3")
 @pytest.mark.parametrize('markup_path,expected_value', [
-    ("test_data/offer", {'Dodano: ': 'w ciągu ostatnich dwóch tygodni', 'Rynek: ': 'wtórny', 'Liczba odsłon: ': '140',
-                         'Źródło: ': 'Biuro nieruchomości', 'Aktualizacja: ': 'dzisiaj'}
+    ("test_data/offer", {'Dodano: ': 1503360000, 'Rynek: ': 'wtórny', 'Liczba odsłon: ': '140',
+                         'Źródło: ': 'Biuro nieruchomości', 'Aktualizacja: ': 1504483200}
 )
 ])
 def test_get_offer_details(markup_path, expected_value):
