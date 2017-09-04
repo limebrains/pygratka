@@ -138,7 +138,6 @@ def convert_string_to_date(date_data=""):
     date_map = {'dzisiaj': 0, 'wczoraj': 1, 'przedwczoraj': 2, 'w tym tygodniu': 6,
                 'w ciągu ostatnich dwóch tygodni': 13, 'w tym miesiącu': 20, 'więcej niż miesiąc temu': 40}
     availability_map = {'od zaraz': 0, 'za miesiąc': 30, 'za 3 miesiące': 90, 'za pół roku': 180}
-    days = date_map.get(date_data) if date_data in date_map else availability_map.get(date_data)
     return (str((dt.datetime.now() - dt.timedelta(days=date_map.get(date_data))).date())
             if date_data in date_map else
             str((dt.datetime.now() + dt.timedelta(days=availability_map.get(date_data))).date())
