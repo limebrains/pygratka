@@ -1,5 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+
+import datetime as dt
 import json
 import re
 import warnings
@@ -42,6 +44,9 @@ def get_offer_apartment_details(html_parser):
             raw_data = raw_data.find_next_sibling("div")
         except AttributeError:
             break
+    available_from_date = details_dict.get("Wolne od")
+    if available_from_date:
+        details_dict["Wolne od"] = parse_date_to_timestamp(available_from_date)
     return details_dict
 
 
@@ -122,6 +127,40 @@ def get_offer_video_link(html_parser):
     return raw_link_data.attrs.get("src", "")[2:] if raw_link_data else ""
 
 
+def convert_string_to_date(date_data=""):
+    """
+    Convert string date description to date str
+    :param date_data: Date description
+    :type date_data: str
+    :return: Date
+    :rtype: str
+    """
+    date_map = {'dzisiaj': 0, 'wczoraj': 1, 'przedwczoraj': 2, 'w tym tygodniu': 6,
+                'w ciągu ostatnich dwóch tygodni': 13, 'w tym miesiącu': 20, 'więcej niż miesiąc temu': 40}
+    availability_map = {'od zaraz': 0, 'za miesiąc': 30, 'za 3 miesiące': 90, 'za pół roku': 180}
+    return (str((dt.datetime.now() - dt.timedelta(days=date_map.get(date_data))).date())
+            if date_data in date_map else
+            str((dt.datetime.now() + dt.timedelta(days=availability_map.get(date_data))).date())
+            if date_data in availability_map else "")
+
+
+def parse_date_to_timestamp(date):
+    """
+    Parses string date to unix timestamp
+    :param date: Date
+    :type date: str
+    :return: Unix timestamp
+    :rtype: int
+    """
+    initial = convert_string_to_date(date)
+    date_parts = initial.split('-')
+    month = int(date_parts[1])
+    year = int(date_parts[0])
+    day = int(date_parts[2])
+    date_added = dt.datetime(year=year, day=day, month=month)
+    return int((date_added - dt.datetime(1970, 1, 1)).total_seconds())
+
+
 def get_offer_details(html_parser):
     """
     This method returns detailed information about the offer.
@@ -132,7 +171,10 @@ def get_offer_details(html_parser):
     raw_detail_data = html_parser.find(class_="statystyki clearOver").find_all("li")
     details = {}
     for detail in raw_detail_data:
-        details[detail.contents[0]] = detail.b.text
+        if "Dodano" in detail.text or "Aktualizacja" in detail.text:
+            details[detail.contents[0]] = parse_date_to_timestamp(detail.b.text)
+        else:
+            details[detail.contents[0]] = detail.b.text
     return details
 
 
@@ -164,7 +206,7 @@ def get_offer_additional_assets(apartment_details):
         'basement': 'piwnica' in apartment_details.get('Powierzchnia dodatkowa', ''),
         'duplex_apartment': 'dwupoziomowe' in apartment_details.get('Liczba poziomów', '') or
                             'wielopoziomowe' in apartment_details.get(
-            'Liczba poziomów', ''),
+                                'Liczba poziomów', ''),
         'garden': 'ogród' in apartment_details.get('Powierzchnia dodatkowa', ''),
         'garage': 'garaż' in apartment_details.get('Garaż/Miejsce parkingowe', ''),
         'cable_tv': 'TV kablowa' in additional_assets
